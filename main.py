@@ -5,7 +5,9 @@ import torch.nn as nn
 import torch.nn.functional as F
 import sys
 from mlp import MLP
+from sklearn.metrics import accuracy_score, average_precision_score
 from sklearn.preprocessing import StandardScaler
+from torch.optim.lr_scheduler import StepLR
 
 
 def main():
