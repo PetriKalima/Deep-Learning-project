@@ -23,10 +23,6 @@ def main():
     valuestoremove = list(set(traindata_x.columns) - set(x_test.columns))
     for value in valuestoremove:
         traindata_x = traindata_x.drop(columns=value)
-    print(traindata_x.shape)    
-    scaler = StandardScaler()
-    #x_train_scaled = scaler.fit_transform(traindata_x)
-    #print(pd.get_dummies(traindata_x))
     if '--load' in sys.argv:
         txtfile = sys.argv[sys.argv.index('--load') + 1]
         hyperparameters = []
@@ -45,12 +41,10 @@ def main():
         maxacc = max(accuracies)
         index = accuracies.index(maxacc)
         hp_best = hyperparameters[index]
-        print(hp_best)
         mlp = MLP(271, int(hp_best[0]), int(hp_best[1]), 1)
         mlp.to(device)
         x_tensor_new = torch.tensor(x_test.values, dtype=torch.float32)
         mlp, acc, outputs, loss = train(2500, traindata_x, traintarget, mlp, float(hp_best[2]))
-        print(acc)
         
         outputs = mlp.forward(x_tensor_new)
         with open("submission.csv", 'w') as csvfile:
@@ -62,8 +56,24 @@ def main():
                 csvfile.write(str(1461+i) + ',' + str(value) + '\n')
                 i += 1                                  
     else:
-        hyperparameters, accuracies = HPSearch(traindata_x, traintarget, device)    
-    
+        hyperparameters, accuracies = HPSearch(traindata_x, traintarget, device)
+        maxacc = max(accuracies)
+        index = accuracies.index(maxacc)
+        hp_best = hyperparameters[index]
+        mlp = MLP(271, int(hp_best[0]), int(hp_best[1]), 1)
+        mlp.to(device)
+        x_tensor_new = torch.tensor(x_test.values, dtype=torch.float32)
+        mlp, acc, outputs, loss = train(2500, traindata_x, traintarget, mlp, float(hp_best[2]))    
+        outputs = mlp.forward(x_tensor_new)
+        
+        with open("submission.csv", 'w') as csvfile:
+            csvfile.write("Id,SalePrice")
+            i = 0
+            values = outputs.detach().numpy()
+            for value in values:
+                value = str(value[0]).replace(',', '.')
+                csvfile.write(str(1461+i) + ',' + str(value) + '\n')
+                i += 1
 
      
 
