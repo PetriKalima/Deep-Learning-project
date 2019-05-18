@@ -65,7 +65,7 @@ def main():
         x_tensor_new = torch.tensor(x_test.values, dtype=torch.float32)
         mlp, acc, outputs, loss = train(2500, traindata_x, traintarget, mlp, float(hp_best[2]))    
         outputs = mlp.forward(x_tensor_new)
-        
+
         with open("submission.csv", 'w') as csvfile:
             csvfile.write("Id,SalePrice")
             i = 0
@@ -88,12 +88,10 @@ def HPSearch(traindata_x, traintarget, device):
     for (size1, size2, lrate) in random_search(n, range1, range2, lrate_range):
         size1, size2 = int(size1), int(size2)
         lrate = np.exp(lrate)
-        hyperparameters.append([size1, size2, lrate])
-        print("HP ", hyperparameters[-1]) 
+        hyperparameters.append([size1, size2, lrate]) 
         mlp = MLP(289, size1, size2, 1)
         mlp.to(device)
         mlp, acc, outputs, loss = train(500, traindata_x, traintarget, mlp, lrate)
-        print("acc ", acc)
         accuracies.append(acc)
 
     with open("results.txt", 'w') as txtfile:
@@ -116,8 +114,6 @@ def train(n, traindata_x, traintarget, mlp, lrate):
         loss = F.mse_loss(outputs, y_tensor)
         loss.backward()
         optimizer.step()    
-    print(outputs, y_tensor)    
-    print(loss)
     acc = 100 - np.mean(np.abs((y_tensor.detach().numpy() - outputs.detach().numpy()) / y_tensor.detach().numpy())) * 100
     return mlp, acc, outputs, loss
 
